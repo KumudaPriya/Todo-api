@@ -34,6 +34,8 @@ app.get('/todos/:id' , function (req, res) {
 
 
 app.post('/todos', function(req , res) {
+
+	console.log('present no of id'+todoNextId);
 	var body = _.pick(req.body , 'description' ,'completed');
 	
 
