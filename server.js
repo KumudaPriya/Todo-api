@@ -56,6 +56,20 @@ app.post('/todos', function(req , res) {
 
 });
 
+app.delete('/todos/:id' , function(req , res) {
+	var TodoId = parseInt(req.params.id);
+	var body = req.body;
+	var matchedObj =  _.findWhere(todos , {id : TodoId });
+
+	if(!_.isObject(matchedObj)) {
+		return res.status(404).send('object is not found');
+	}
+
+	todos = _.without(todos , matchedObj);
+	res.json(matchedObj);
+
+});
+
 app.listen(PORT , function() {
 	console.log("server is working");
 });
