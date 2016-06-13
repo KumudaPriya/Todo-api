@@ -72,6 +72,36 @@ app.delete('/todos/:id' , function(req , res) {
 
 });
 
+ 
+
+app.put('/todos/:id' , function(req , res) {
+	var body = _.pick(req.body , 'description' ,'completed');
+	var ValidAttributes = {};
+
+	var todoId = parseInt(req.params.id , 10);
+	var matchedObj =  _.findWhere(todos , {id : todoId });
+
+	if(body.hasOwnProperty('completed') && _.isBoolean(body.completed)) {
+		ValidAttributes.completed = body.completed;
+	}else if(body.hasOwnProperty('completed')) {
+		console.log('error1');
+		return res.status(400).send();
+	}
+
+	if(body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length >  0) {
+		ValidAttributes.description = body.description;
+	}else if(body.hasOwnProperty('description')) {
+		console.log('error2');
+		return res.status(400).send();
+	}
+
+	console.log('ValidAttributes : ');
+	console.log(ValidAttributes);
+	_.extend(matchedObj , ValidAttributes);
+	res.json(matchedObj);
+
+});
+
 app.listen(PORT , function() {
 	console.log("server is working");
 });
