@@ -142,8 +142,7 @@ app.delete('/todos/:id', function(req, res) {
 	db.todo.destroy({
 		where: {
 			id: TodoId
-		},
-		truncate: true /* this will ignore where and truncate the table instead */
+		}
 	}).then(function (affectedRows) {
 		
 		if(affectedRows >= 1) {
