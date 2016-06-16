@@ -143,15 +143,14 @@ app.delete('/todos/:id', function(req, res) {
 		where: {
 			id: TodoId
 		}
-	}).then(function (affectedRows) {
-		
-		if(affectedRows >= 1) {
+	}).then(function(affectedRows) {
+
+		if (affectedRows >= 1) {
 			res.send('succesfully deleted');
-		}
-		else {
+		} else {
 			res.status(400).send('no item with this id');
 		}
-	}).catch(function (e) {
+	}).catch(function(e) {
 		console.log(e.message);
 		res.status(400).send(e.message);
 	});
@@ -177,28 +176,31 @@ app.put('/todos/:id', function(req, res) {
 	var ValidAttributes = {};
 
 	var todoId = parseInt(req.params.id, 10);
-	var matchedObj = _.findWhere(todos, {
-		id: todoId
+
+	if (body.hasOwnProperty('completed')) {
+		ValidAttributes.completed = body.completed;
+	}
+
+	if (body.hasOwnProperty('description')) {
+		ValidAttributes.description = body.description;
+	}
+
+	db.todo.findById(todoId).then(function(todo) {
+		if (todo) {
+			todo.update(ValidAttributes).then(function(todo) {
+				res.json(todo.toJSON());
+			}, function(e) {
+				return res.status(400).json(e);
+			});
+		} else {
+			res.status(404).send('no todo item with this item');
+		}
+
+	}, function(e) {
+		res.status(500).json(e);
 	});
 
-	if (body.hasOwnProperty('completed') && _.isBoolean(body.completed)) {
-		ValidAttributes.completed = body.completed;
-	} else if (body.hasOwnProperty('completed')) {
-		console.log('error1');
-		return res.status(400).send();
-	}
 
-	if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0) {
-		ValidAttributes.description = body.description;
-	} else if (body.hasOwnProperty('description')) {
-		console.log('error2');
-		return res.status(400).send();
-	}
-
-	console.log('ValidAttributes : ');
-	console.log(ValidAttributes);
-	_.extend(matchedObj, ValidAttributes);
-	res.json(matchedObj);
 
 });
 
