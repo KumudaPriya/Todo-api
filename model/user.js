@@ -44,7 +44,7 @@ module.exports = function(sequelize, DataTypes) {
 		},
 		classMethods: {
 			authenticate: function(body) {
-				return new Promise(function(resolve, reject) {
+				return new Promise( function (resolve, reject) {
 					if (typeof body.email !== 'string' || typeof body.password !== 'string') {
 						return reject();
 					}
@@ -63,6 +63,30 @@ module.exports = function(sequelize, DataTypes) {
 					});
 				});
 
+			} , 
+
+			findByToken: function(token) {
+				return new Promise( function (resolve , reject) {
+					try {
+						var decodedJWT = jwt.verify(token , 'qwerty@');
+						var bytes = cryptojs.AES.decrypt(decodedJWT.token , 'abc123!@#!');
+						var tokenObj = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
+
+						user.findById(tokenObj.id).then( function (user) {
+							if(user) {
+								resolve(user);
+							}else{
+								reject();
+							}
+						},function (e) {
+							reject();
+						});
+
+					}catch(e) {
+						console.error(e);
+						reject();
+					}
+				});
 			}
 		},
 		instanceMethods: {
