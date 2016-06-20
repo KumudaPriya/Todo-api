@@ -2,7 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var _ = require('underscore');
 var db = require('./db.js');
-
+var bcrypt = require('bcrypt');
 
 var app = express();
 var PORT = process.env.PORT || 3005;
@@ -149,6 +149,17 @@ app.post('/users', function(req, res) {
 		});
 
 	
+
+});
+
+app.post('/users/login' , function(req ,res) {
+	var body = _.pick(req.body , 'email' , 'password');
+
+	db.user.authenticate(body).then(function(user) {
+		res.json(user.toPublicJSON());
+	} , function() {
+		res.status(401).send();
+	});
 
 });
 
