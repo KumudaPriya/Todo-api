@@ -18,7 +18,7 @@ app.get('/', function(req, res) {
 });
 
 
-app.get('/todos', middleware.requireAuthentication , function(req, res) {
+app.get('/todos', middleware.requireAuthentication, function(req, res) {
 	var queryParams = req.query;
 	var where = {};
 
@@ -74,7 +74,7 @@ app.get('/todos', middleware.requireAuthentication , function(req, res) {
 	// res.json(filteredTodos);
 });
 
-app.get('/todos/:id', middleware.requireAuthentication , function(req, res) {
+app.get('/todos/:id', middleware.requireAuthentication, function(req, res) {
 	var TodoId = parseInt(req.params.id);
 
 	db.todo.findById(TodoId)
@@ -102,7 +102,7 @@ app.get('/todos/:id', middleware.requireAuthentication , function(req, res) {
 });
 
 
-app.post('/todos', middleware.requireAuthentication , function(req, res) {
+app.post('/todos', middleware.requireAuthentication, function(req, res) {
 
 	var body = _.pick(req.body, 'description', 'completed');
 
@@ -110,28 +110,22 @@ app.post('/todos', middleware.requireAuthentication , function(req, res) {
 	db.todo.create(body)
 		.then(function(todo) {
 
-			res.json(todo.toJSON());
-		}).catch(function(e) {
+			//res.json(todo.toJSON());
+			req.user.addTodo(todo).then(function() {
+				return todo.reload();
+			}).then(function(todo) {
+				res.json(todo.toJSON());
+			} , function(e) {
+				console.error(e);
+				res.status(400).json(e);
+			});
+
+		},function(e) {
 			console.log(e);
 			res.status(400).json(e);
 		});
 
-	// if (!_.isObject(body) || !_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
 
-	// 	return res.status(400).send();
-	// }
-
-
-	// body.description = body.description.trim();
-	// body.id = todoNextId;
-
-	// todos.push(body);
-	// todoNextId = todoNextId + 1;
-
-	// console.log(body);
-
-
-	// res.json(body);
 
 });
 
@@ -149,22 +143,22 @@ app.post('/users', function(req, res) {
 			res.status(400).json(e);
 		});
 
-	
+
 
 });
 
-app.post('/users/login' , function(req ,res) {
-	var body = _.pick(req.body , 'email' , 'password');
+app.post('/users/login', function(req, res) {
+	var body = _.pick(req.body, 'email', 'password');
 
 	db.user.authenticate(body).then(function(user) {
 		var token = user.generateToken('authentication');
-		if(token) {
-			res.header('Auth' , token).json(user.toPublicJSON());
-		}else  {
+		if (token) {
+			res.header('Auth', token).json(user.toPublicJSON());
+		} else {
 			res.status(401).send();
 		}
-		
-	} , function() {
+
+	}, function() {
 		res.status(401).send();
 	});
 
@@ -207,7 +201,7 @@ app.delete('/todos/:id', middleware.requireAuthentication, function(req, res) {
 
 
 
-app.put('/todos/:id', middleware.requireAuthentication , function(req, res) {
+app.put('/todos/:id', middleware.requireAuthentication, function(req, res) {
 	var body = _.pick(req.body, 'description', 'completed');
 	var ValidAttributes = {};
 
@@ -240,7 +234,9 @@ app.put('/todos/:id', middleware.requireAuthentication , function(req, res) {
 
 });
 
-db.sequelize.sync({force: true}).then(function() {
+db.sequelize.sync({
+	//force: true
+}).then(function() {
 
 	app.listen(PORT, function() {
 		console.log("server is working");
