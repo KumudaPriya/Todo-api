@@ -247,7 +247,7 @@ app.put('/todos/:id', middleware.requireAuthentication, function(req, res) {
 });
 
 db.sequelize.sync({
-	//force: true
+	force: true
 }).then(function() {
 
 	app.listen(PORT, function() {
